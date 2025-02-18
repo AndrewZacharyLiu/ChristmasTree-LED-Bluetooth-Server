@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Picker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        section {
+            text-align: center;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            text-decoration: none;
+            color: #fff;
+            background-color: #007BFF;
+            border-radius: 5px;
+        }
+        a:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <section>
+        <h1>Color Picker</h1>
+        <form>
+            {% csrf_token %}
+            <label for="color-input">Color:</label>
+            <input type="color" id="color-input" name="color"><br><br>
+
+            <button type="button" onclick="submitColor()">Submit</button>
+        </form>
+        <a href="/">Back to Home</a>
+    </section>
+
+    <script>
+        function submitColor() {
+            const color = document.getElementById("color-input").value;
+    
+            // Use fetch to make an AJAX POST request to Django
+            fetch("/submit-color/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCSRFToken() // Get the CSRF token for security
+                },
+                body: JSON.stringify({color: color })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    // If the response is not OK, try to parse error details
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.message || "Unknown error occurred");
+                    });
+                }
+                return response.json(); // Parse JSON for a successful response
+            })
+            .then(data => {
+                alert(data.message); // Always alert the message from the server
+            })
+            .catch(error => {
+                alert(`Error: ${error.message}`); // Alert the error message
+            });
+        }
+    
+        // Function to retrieve CSRF token from Django
+        function getCSRFToken() {
+            return document.querySelector("[name=csrfmiddlewaretoken]").value;
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
+
